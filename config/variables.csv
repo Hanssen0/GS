@@ -1,0 +1,6 @@
+'key',value
+MAX_THRESHOLD = 10
+UNIT = 1
+WEIGHT_l1 = 2
+WEIGHT_l2 = 1.5
+WEIGHT_l3 = 1.25
