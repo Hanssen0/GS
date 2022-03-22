@@ -1,11 +1,23 @@
 import csv
+import zipfile
+
+from fitz import Rect
+
 from utils.preprocess_utils import *
 from utils.item_grading import *
 import re
 import json
+import hashlib
+
 from init_utils import *
 root = init_by_key('root')
-
+# import comtypes
+def hash_file(filename):
+    sha256_hash = hashlib.sha256()
+    with open(filename,"rb") as f:
+        for byte_block in iter(lambda: f.read(4096),b""):
+            sha256_hash.update(byte_block)
+        return sha256_hash.hexdigest()
 
 def judge_folder(folder_path,model):
 
@@ -59,11 +71,11 @@ def judge_folder(folder_path,model):
 
     if(f):
         to_pro['FILES'] = pro
-        with open(file_name,'w',encoding='utf8') as file_obj:
-
-            json.dump(to_pro,file_obj,indent=4,ensure_ascii=False)
-
-            print(name+'写入成功')
+        # with open(file_name,'w',encoding='utf8') as file_obj:
+        #
+        #     json.dump(to_pro,file_obj,indent=4,ensure_ascii=False)
+        #
+        #     print(name+'写入成功')
         return to_pro
 def sim_json(js):
     s_js = {}
@@ -187,6 +199,16 @@ def is_file_legal(path):
                 return True
     return False
 
+# def doc2pdf(infile,outfile='b.pdf'):
+#     wdFormatPDF = 17
+#     word = comtypes.client.CreateObject('Word.Application')
+#     doc = word.Documents.Open(infile)
+#     doc.SaveAs(outfile, FileFormat=wdFormatPDF)
+#     doc.Close()
+#     word.Quit()
+def make_zip(fpath):
+    shutil.make_archive(fpath+'res', 'zip', fpath+'res')
+
 
 if __name__=='__main__':
     # train_f = 'data/train_test.txt'
@@ -206,8 +228,22 @@ if __name__=='__main__':
     #         js = judge_folder(f[0])
     #         s_js = sim_json(js)
         #`
-    f_path = "/Users/oo/STUDY/STUDY/Postgraduate/papers/wordCl/data/src_data/"
-    # f_path = "/Users/oo/STUDY/STUDY/Postgraduate/papers/wordCl/data/src_data/苏州服务外包2020第六届江苏省互联网+大赛外包学院校内决赛送评委审阅材料/4 (红旅)“一箭三雕”生态养殖创业项目/"
-    is_file_legal(f_path)
+    f_path = "/Users/oo/STUDY/STUDY/Postgraduate/papers/wordCl/data/src_data/2020年南通大学“互联网+”大学生创新创业大赛重点培育项目外审材料/30个项目/9.南通崇安环保科技/南通崇安环保科技有限公司“互联网+”商业计划书-丁孙浩.pdf"
+    l = ['项目简介']
+    l = ['副教授', '资金来源', '前景', '净利润', '计算机软件', '学院', '知识产权', '产业', '分析', '资金', '预测', '现状', '技术开发', '销售额', '研究员', '销售收入', '投资', '规模', '教授', '著作权']
+    infile = "/Users/oo/STUDY/STUDY/Postgraduate/papers/wordCl/data/src_data/苏州大学医学部2020创业项目/苏州大学医学部互联网+项目/21基于蛋白纳米反应器的肿瘤诊疗一体化纳米药物的开发-龚黎明-医学部/基于蛋白纳米反应器的肿瘤诊疗一体化纳米药物的开发-商业计划书-龚黎明.docx"
+    infile1 = "/Users/oo/STUDY/STUDY/Postgraduate/papers/wordCl/data/src_data/苏州大学医学部2020创业项目/苏州大学医学部互联网+项目/21基于蛋白纳米反应器的肿瘤诊疗一体化纳米药物的开发-龚黎明-医学部/基于蛋白纳米反应器的肿瘤诊疗一体化纳米药物的开发-商业计划书-龚黎明的副本.docx"
+    infile1 = "/Users/oo/STUDY/STUDY/Postgraduate/papers/wordCl/data/src_data/苏州大学医学部2020创业项目/苏州大学医学部互联网+项目/21基于蛋白纳米反应器的肿瘤诊疗一体化纳米药物的开发-龚黎明-医学部/基于蛋白纳米反应器的肿瘤诊疗一体化纳米药物的开发-商业计划书-龚黎明的副本2.docx"
+    path = root+'data/var/www/uploads/1647831978650941_0/灵犀三维可视化交互系统（项目计划书）.pdf'
+    js = {'SCORE': {'AI': 67.5}, 'FILES': [{'NAME': '灵犀三维可视化交互系统（项目计划书）', 'LABELS': {'__label__ACADEMIC': {'items': ['学院', '副教授', '研究员', '教授'], 'score': 1}, '__label__INDUSTRIAL': {'items': [], 'score': 0}, '__label__BUSINESS': {'items': ['销售收入', '净利润', '产业', '现状', '规模', '销售额', '前景', '分析', '预测'], 'score': 1}, '__label__INVESTMENT': {'items': ['投资', '资金', '资金来源'], 'score': 1}, '__label__PATENTS': {'items': ['著作权', '计算机软件', '知识产权', '技术开发'], 'score': 1}}, 'ENTITYS': [{'name': '副教授', 'score': 1.75}, {'name': '教授', 'score': 1.75}]}]}
+
+    # pdf_hl(path,l,js)
+
+    fpath,fname=os.path.split(path)
+
+    make_zip(fpath)
+
+
+# doc2pdf(infile)
 
 

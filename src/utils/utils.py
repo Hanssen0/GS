@@ -1,6 +1,9 @@
 import jieba
 import fitz
+import hashlib
 import jieba.posseg as pseg
+from fitz import Rect
+
 from init_utils import *
 root = init_by_key('root')
 pro_dic = {}
@@ -220,5 +223,117 @@ def judge_score_list(name,pro,comp = False):
             dic['BIAS'] = dic['AI']- dic['TRUES']
     return dic
 
+
+def hash_file(filename):
+    sha256_hash = hashlib.sha256()
+    with open(filename,"rb") as f:
+        for byte_block in iter(lambda: f.read(4096),b""):
+            sha256_hash.update(byte_block)
+        return sha256_hash.hexdigest()
+
+def get_fname_by_path(f_path):
+    tmp  = f_path.split('/')
+    res = os.path.splitext(tmp[-1])
+    return res[0]
+
+def get_ftype_by_path(f_path):
+    tmp  = f_path.split('/')
+    res = os.path.splitext(tmp[-1])
+    return res[-1]
+
+def hash_list(folder_path):
+    list = listdir(folder_path,[])
+
+    h_l = []
+    h_txt = ''
+    for filename in list:
+        h_l.append(hash_file(filename))
+    h_l.sort()
+    for h in h_l:
+        h_txt+=str(h)
+    return h_txt
+def pdf_hl(f_path,l,js):
+    try:
+        pdf=fitz.open(f_path)
+    except:
+        return
+    heads= []
+    # table = [{}*5][]
+
+    article_inf = {}
+    blocks_list = []
+    index = 0
+    for index,page in enumerate(pdf):
+        text=page.getText()
+
+        blocks = page.get_text("blocks")
+        lines = page.get_text("lines")
+        # for blo in blocks:
+        #     for item in l :
+        #         if(item in blo[4]):
+        #             # for txt in page.searchFor(blo[4]):
+        #             page.addHighlightAnnot(Rect(blo[0],blo[1],blo[2],blo[3]))
+
+        if('。' in text):
+            sens=text.replace('\n',' ').split('。')
+
+            for blo in sens:
+                for item in l :
+                    if(item in blo):
+                        for txt in page.searchFor(blo.strip()):
+                            highlight = page.addHighlightAnnot(txt)
+                            highlight.setColors({"stroke":(0, 1, 0), "fill":(0.75, 0.8, 0.95)})
+                            highlight.update()
+
+        else:
+            if(index==0):
+                continue
+            sens=text.split('\n')
+
+            for blo in sens:
+                for item in l :
+                    if(item in blo):
+                        for txt in page.searchFor(blo.strip()):
+                            highlight = page.addHighlightAnnot(txt)
+                            # highlight.setColors({"stroke":(1, 0, 0), "fill":(0.75, 0.8, 0.95)})
+                            #
+                            # highlight.update()
+
+    if(index>3):
+        txt = ""
+        ch_l = {'__label__ACADEMIC':'优化文书中该项工在人才团队方面的优势',
+                '__label__PATENTS':'优化文书中该项工在专利奖项方面的优势',
+                '__label__INVESTMENT':'优化文书中该项工在投融资方面的优势',
+                '__label__BUSINESS':'优化文书中该项目在商业市场的优势',
+                '__label__INDUSTRIAL':'优化文书中该项在产业方面的优势',}
+        if('FILES' in js.keys()):
+            files = js['FILES']
+            for f in files:
+                fname = get_fname_by_path(f_path)
+                if(fname!=f['NAME']):
+                    continue
+                labels = f['LABELS']
+                for label in labels.keys():
+                    if(labels[label]['score']==0):
+                        txt=txt+ch_l[label]+'\n'
+
+        for index,page in enumerate(pdf):
+
+            if(index==0):
+
+
+                page.addTextAnnot ((200,200), txt)
+    fpath,fname=os.path.split(f_path)
+    if not os.path.exists(fpath+'/res'):  #判断是否存在文件夹如果不存在则创建为文件夹
+        os.mkdir(fpath+'/res')
+
+    pdf.save(fpath+'/res/'+fname)
+
+
+def get_res_files(folder_path,s,js):
+    list = listdir(folder_path,[])
+    for f in list :
+        if(f.endswith('pdf')):
+            pdf_hl(f,s,js)
 
 

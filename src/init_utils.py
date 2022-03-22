@@ -1,6 +1,5 @@
 import xml.dom.minidom as xmldom
 import os
-
 file = os.path.abspath(__file__)
 root = file[0:len(file)-18]
 def init_by_key(key):

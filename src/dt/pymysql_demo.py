@@ -255,3 +255,4 @@ def update_pwd(sql, args):
         conn.rollback()
         close_conn(conn, cur)
         return False
+

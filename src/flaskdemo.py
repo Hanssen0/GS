@@ -7,7 +7,6 @@ from utils.wordcloud_utils import *
 from flask_cors import CORS
 import time
 from flask_mail import Mail, Message
-
 from flask import jsonify
 from captcha import captcha_message
 from captcha.captcha_tool import CaptchaTool
@@ -24,11 +23,9 @@ app.config["SECRET_KEY"] = "156456dsadasd"
 app.config['MAIL_SERVER'] = 'smtp.163.com'
 # app.config['MAIL_USER_TLS'] = True
 app.config['MAIL_PORT'] = 25
-
 app.config['MAIL_USERNAME'] = 'meta_intell@163.com'
 app.config['MAIL_PASSWORD'] = 'MJZAOVPSJRXNWWUU'
 app.config['MAIL_DEFAULT_SENDER'] = 'meta_intell@163.com'
-
 mail = Mail(app)
 CORS(app)
 model_name = root+'model/classify_8.bin'
@@ -36,8 +33,6 @@ model = fasttext.load_model(model_name)
 # root = '/home/oo/wordCl/'
 captcha_code_g = ''
 from test import *
-
-
 @app.before_request
 def before():
     print(request.path)
@@ -54,8 +49,6 @@ def before():
     if is_overdue != user:
         result = response_result.TOKEN_NOPASS
         return jsonify(result)
-
-
 @app.route("/getEmail", methods=["GET"])
 def get_email():
     username = request.args.get('username')
@@ -63,7 +56,6 @@ def get_email():
     res = pymysql_demo.select_email(get_email_sql, [username])
     result = {'email': res}
     return jsonify(result)
-
 @app.route('/sendMail')
 def send_mail():
     email = request.args.get('email')
@@ -87,8 +79,6 @@ def send_mail():
     print("success")
     session["email_code"] = email_code
     return jsonify(response_result.SEND_EMAIL_SUCCESS)
-
-
 @app.route('/emailValidate', methods=["POST"])
 def email_validate():
     req = request
@@ -103,26 +93,19 @@ def email_validate():
         if res:
             return jsonify(response_result.EMAIL_UPDATE_SUCCESS)
     return jsonify(response_result.EMAIL_CODE_FAILURE)
-
-
-
 # @app.route('/')
 # def index():
 #     return 'hello!'
-
 # 主页面
 @app.route('/')
-
 @app.route('/index')
 def index():
     return render_template('index.html')
-
     # if(name=='index'):
     #
     #     return render_template('index.html')
     # else:
     #     return app.send_static_file('logo.png')
-
 @app.route('/src/assets/logo.png')
 def logo():
     try:
@@ -130,7 +113,6 @@ def logo():
     except Exception as e:
         print(e)
         return str(e)
-
 @app.route('/handler', methods=["POST"])   #文件处理总流程
 def handler():
     js={}
@@ -145,75 +127,66 @@ def handler():
         fname = f.filename
         type = judge_file(fname)
         f_name = fname.split('.')[0]
-
-
         uncompress(f,type,cur_timestamp+f_index)
         f_path = root+'data/var/www/uploads/'+cur_timestamp+f_index+'/'
         res = is_file_legal(f_path)
         # js['msg'] = 'successfully'
         # json_data = json.dumps(js, ensure_ascii=False)
-
         if( not res ):
             result = response_result.UPLOAD_FAILURE_FILE_IILLEEGAL
             result["msg"] = '请上传正确的项目文件！'
-
             return jsonify(result)
         else:
             username = request.headers.get('username')
             username  = urllib.parse.unquote(username,encoding='utf-8')
             # sql_get_userid= "select id from user where userName = %s"
             # userid = pymysql_demo.select_get_userid(sql_get_userid, [username])
-
-
             # sql_register = "insert into user (userName, password, email, create_time, userType) values (%s, %s, %s, now(), 0)"
             # res = pymysql_demo.user_insert(sql_register, [username, password_md5, email])
             js = judge_folder(f_path,model) #存在数据库中的json数据
-
-
             score = js['SCORE']['AI']
             res = True
             ip = request.remote_addr
-
-            sql_record = "select * from record where user_name = %s and score = %s and json_dict = %s and ip = %s"
-            res = pymysql_demo.select_record(sql_record, [username, float(score), str(js),ip])
+            sql_record = "select * from record where user_name = %s and score = %s and json_dict = %s and ip = %s and hash=%s "
+            hs = hash_list(f_path)
+            res = pymysql_demo.select_record(sql_record, [username, float(score), str(js),ip,hs])
+            img_base64,s = json2img(js)
+            res_files = get_res_files(f_path,s,js)
+            make_zip(f_path)
             if(res):
-                sql_token_record_insert = "insert into record (user_name,score,file_path,upload_time,json_dict,ip) values (%s, %s,%s,now(),%s,%s)"
-                res_token_ = pymysql_demo.record_insert(sql_token_record_insert, [username, float(score), f_path, str(js),ip])
+                sql_token_record_insert = "insert into record (user_name,score,file_path,upload_time,json_dict,ip,hash) values (%s, %s,%s,now(),%s,%s,%s)"
+                res_token_ = pymysql_demo.record_insert(sql_token_record_insert, [username, float(score), f_path, str(js),ip,hs])
             else:
-                shutil.rmtree(f_path)
-
-
+                pass
+                # shutil.rmtree(f_path)
     # return {
         #     'code':500,
         #     'msg':'文件类型错误',
         #     'data':json
         # }
-        img_base64 = json2img(js)
+
         # sim_js = sim_json(js)
         res = js['SCORE']['AI']  #存在数据库中的分数
         tmp = {
             'msg': res,
             'pic' :img_base64,
-            'name':f_name
+            'name':f_name,
+            'zip_file':f_path+'res.zip'
         }
         bp.append(tmp)
-
     result = response_result.LOGIN_SUCCESS
     result['plan'] = bp
     return jsonify(result)
     # return {json_data,200,{'ContentType':'application/json'}}
-
     #     {
     #     'code':200,
     #     'msg':'successfully',
     #     'data':json_data
     # }
-
 def sim_json(js):
     s_js = {}
     score={}
     files=[]
-
     score['AI'] = js['SCORE']['AI']
     for f in js['FILES']:
         new_f = {}
@@ -221,28 +194,19 @@ def sim_json(js):
         labels = f['LABELS']
         new_ls = {}
         etys=[]
-
         for l in labels.keys():
-
             if(len(labels[l]['items'])>0):
                 new_ls[l]={}
                 new_ls[l]['items'] = labels[l]['items']
         new_f['LABELS'] = new_ls
-
         for e in f['ENTITYS']:
             new_e = {}
             new_e['name'] = e['name']
             etys.append(new_e)
         new_f['ENTITYS']= etys
         files.append(new_f)
-
-
-
     s_js['FILES']     = files
     s_js['SCORE']     = score
-
-
-
     return s_js
 def judge_file(fname):
     l = ['docx','pdf','zip','rar']
@@ -252,21 +216,15 @@ def judge_file(fname):
     else:
         return type
 
-
-
-
 @app.route('/file/upload/',methods=['POST'])
 def search():
     print(request.args)
     f = request.files.get('filename')
     f.save(root+'data/var/www/uploads/' + (f.filename))
     return 'search'
-
 @app.route('/tokenAvailable', methods=["POST"])
 def token_available():
     return jsonify(response_result.LOGIN_SUCCESS)
-
-
 @app.route('/getUserName', methods=["GET"])
 def get_username():
     # request.headers.get('token')
@@ -277,8 +235,6 @@ def get_username():
     if not res:
         return jsonify(response_result.USERNAME_OCCUPIDE)
     return jsonify(response_result.LOGIN_SUCCESS)
-
-
 @app.route('/login', methods=["POST"])
 def login():
     req = request
@@ -317,8 +273,6 @@ def login():
                 result['token'] = token
                 return jsonify(result)
     return jsonify(response_result.LOGIN_FAILURE)
-
-
 @app.route('/register', methods=["POST"])
 def register():
     req = request
@@ -351,7 +305,6 @@ def captcha_launch():
     if res:
         return jsonify(response_result.MESSAGE_LAUNCHED_SUCCESS)
     return jsonify(response_result.MESSAGE_LAUNCHED_FAILURE)
-
 @app.route('/testGetCaptcha', methods=["GET"])
 def test_get_captcha():
     """
@@ -369,7 +322,6 @@ def test_get_captcha():
     result = response_result.LOGIN_SUCCESS
     result["img"] = img
     return jsonify(result)
-
 def test_verify_captcha(code):
     # 获取session中的验证码
     s_code = session.get("code", None)
@@ -393,7 +345,6 @@ def reset_pwd():
         return jsonify(response_result.PASSWORD_UPDATE_SUCCESS)
     else:
         return jsonify(response_result.PASSWORD_UPDATE_FAILURE)
-
 @app.route('/updatePass', methods=["POST"])
 def update_pass():
     req = request
@@ -408,14 +359,10 @@ def update_pass():
         user_usertype_update_sql = "update user set password=%s where userName=%s and email=%s"
         res = pymysql_demo.update_pwd(user_usertype_update_sql, [password_md5, username, email])
         if res:
-
-
-
             return jsonify(response_result.PASSWORD_UPDATE_SUCCESS)
         else:
             return jsonify(response_result.PASSWORD_UPDATE_FAILURE)
     return jsonify(response_result.EMAIL_CODE_FAILURE)
-
 @app.route('/historyRecord', methods=["GET"])
 def get_history_record():
     username = request.args.get('username')
@@ -435,6 +382,7 @@ def get_history_record():
     result["records"] = records
 
     return jsonify(result)
+
 
 
 if __name__ == '__main__':

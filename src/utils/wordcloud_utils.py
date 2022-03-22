@@ -9,11 +9,12 @@ root = init_by_key('root')
 
 def dic2text(dic):
     text = ''
-    ch_l = {'__label__ACADEMIC':'学术',
+    s = set()
+    ch_l = {'__label__ACADEMIC':'人才团队',
             '__label__PATENTS':'专利奖项',
             '__label__INVESTMENT':'投融资',
             '__label__BUSINESS':'商业市场',
-            '__label__INDUSTRIAL':'工业',}
+            '__label__INDUSTRIAL':'产业',}
     if('FILES' in dic.keys()):
         files = dic['FILES']
         for f in files:
@@ -24,12 +25,14 @@ def dic2text(dic):
                     text = text + (ch_l[l]+' ')*int(labels[l]['score']*5)
                 items = labels[l]['items']
                 for i in items:
+                    s.add(i)
                     if( i not in text):
                         text = text + (i+' ')
             for ety in etys:
                 if(ety['name'] not in text):
+                    s.add(ety['name'])
                     text = text + (ety['name']+' ')*int(ety['score']*2.5)
-    return text
+    return text,s
 
 
 
@@ -57,6 +60,6 @@ def word_cloud(text):
     return img_base64
 
 def json2img(dic):
-    txt = dic2text(dic)
+    txt,s = dic2text(dic)
     img_base64 = word_cloud(txt)
-    return img_base64
+    return img_base64,s

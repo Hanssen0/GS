@@ -3,14 +3,11 @@ import io
 import random
 import string
 from PIL import Image, ImageFont, ImageDraw
-
 class CaptchaTool(object):
     """
     生成图片验证码
     """
-
     def __init__(self, width=50, height=12):
-
         self.width = width
         self.height = height
         # 新图片对象
@@ -19,7 +16,6 @@ class CaptchaTool(object):
         self.font = ImageFont.load_default()
         # draw对象
         self.draw = ImageDraw.Draw(self.im)
-
     def draw_lines(self, num=3):
         """
         划线
@@ -30,7 +26,6 @@ class CaptchaTool(object):
             x2 = random.randint(0, self.width)
             y2 = random.randint(self.height / 2, self.height)
             self.draw.line(((x1, y1), (x2, y2)), fill='black', width=1)
-
     def get_verify_code(self):
         """
         生成验证码图形
@@ -54,4 +49,3 @@ class CaptchaTool(object):
         self.im.save(buffered, format="JPEG")
         img_str = base64.b64encode(buffered.getvalue())
         return img_str, code
-
