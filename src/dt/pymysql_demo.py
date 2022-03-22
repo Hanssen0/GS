@@ -130,6 +130,32 @@ def select_get_user(sql, args):
         close_conn(conn, cur)
         return False
 
+def select_get_user_info(args):
+    conn, cur = create_conn()
+    try:
+        cur.execute("select * from user where userName = %s", args)
+        conn.commit()
+        close_conn(conn, cur)
+        res = cur.fetchall()
+        for r in res:
+            username = r['userName']
+            email = r['email']
+            usertype = r['userType']
+            print("select_get_user_info=>", username, email, usertype)
+        if len(res) == 0:
+            return ''
+
+        return {
+            "username": username,
+            "email": email,
+            "usertype": usertype,
+        }
+    except Exception as e:
+        print("user select except", args)
+        conn.rollback()
+        close_conn(conn, cur)
+        return False
+
 def select_get_userid(sql, args):
     conn, cur = create_conn()
     try:
@@ -140,6 +166,20 @@ def select_get_userid(sql, args):
         return data['id']
     except Exception as e:
         print("user select except", args)
+        conn.rollback()
+        close_conn(conn, cur)
+        return False
+
+def select_records():
+    conn, cur = create_conn()
+    try:
+        cur.execute("select * from record")
+        result = cur.fetchall()
+        conn.commit()
+        close_conn(conn, cur)
+        return result
+    except Exception as e:
+        print("records select except")
         conn.rollback()
         close_conn(conn, cur)
         return False

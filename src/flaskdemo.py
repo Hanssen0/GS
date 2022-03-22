@@ -416,6 +416,27 @@ def update_pass():
             return jsonify(response_result.PASSWORD_UPDATE_FAILURE)
     return jsonify(response_result.EMAIL_CODE_FAILURE)
 
+@app.route('/historyRecord', methods=["GET"])
+def get_history_record():
+    username = request.args.get('username')
+    print('username:', username)
+
+    res = pymysql_demo.select_get_user_info([username])
+
+    if res == False or res == '':
+        return jsonify(response_result.USER_NOT_EXISTS)
+
+    if res["usertype"] != 2:
+        return jsonify(response_result.NO_PERMISSION)
+
+    records = pymysql_demo.select_records()
+
+    result = response_result.SUCCESS
+    result["records"] = records
+
+    return jsonify(result)
+
+
 if __name__ == '__main__':
     if(root!='/Users/oo/STUDY/STUDY/Postgraduate/papers/wordCl/'):
         app.run(host='0.0.0.0',port=443,ssl_context=(

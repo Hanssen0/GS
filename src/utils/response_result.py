@@ -80,3 +80,18 @@ PASSWORD_UPDATE_FAILURE = {
 UPLOAD_FAILURE_FILE_IILLEEGAL = {
     "code": 11111
 }
+
+# 权限不足
+NO_PERMISSION = {
+    "code": 11112
+}
+
+# 用户不存在
+USER_NOT_EXISTS = {
+    "code": 11113
+}
+
+# 成功
+SUCCESS = {
+    "code": 200
+}
