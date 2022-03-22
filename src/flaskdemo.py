@@ -1,4 +1,5 @@
-from flask import Flask,render_template,request,session,send_from_directory,redirect
+import flask
+from flask import Flask, render_template, request, session, send_from_directory, redirect, make_response
 import JWT_demo
 from utils import response_result
 from dt import pymysql_demo
@@ -171,7 +172,7 @@ def handler():
             'msg': res,
             'pic' :img_base64,
             'name':f_name,
-            'zip_file':f_path+'res.zip'
+            'zip_file':cur_timestamp+f_index
         }
         bp.append(tmp)
     result = response_result.LOGIN_SUCCESS
@@ -383,7 +384,16 @@ def get_history_record():
 
     return jsonify(result)
 
+# @app.route('/downloadRes', methods=["GET"])
+# def down_file(path):
+#     response = make_response(flask.send_file(path))
+#     response.headers["Content-Disposition"] = "attachment; filename={};".format(file_name)
+#     return response
 
+
+@app.route("/download/<fname>", methods=['GET'])
+def download_file(fname):
+    return send_from_directory(root+'data/tmp/res/', fname+'.zip', as_attachment=True)
 
 if __name__ == '__main__':
     if(root!='/Users/oo/STUDY/STUDY/Postgraduate/papers/wordCl/'):

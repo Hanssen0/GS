@@ -207,7 +207,12 @@ def is_file_legal(path):
 #     doc.Close()
 #     word.Quit()
 def make_zip(fpath):
-    shutil.make_archive(fpath+'res', 'zip', fpath+'res')
+    if not os.path.exists(root+'data/tmp/res'):  #判断是否存在文件夹如果不存在则创建为文件夹
+        os.mkdir(root+'data/tmp/res')
+
+    fname=fpath[0:-1].split('/')[-1]
+
+    shutil.make_archive(root+'data/tmp/res/'+fname, 'zip', fpath+'/res')
 
 
 if __name__=='__main__':
