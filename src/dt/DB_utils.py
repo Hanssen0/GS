@@ -6,7 +6,7 @@ root = init_by_key('root')
 
 
 h = '127.0.0.1'
-if(root=='/Users/oo/STUDY/STUDY/Postgraduate/papers/GS/'):
+if(root=='/Users/oo/STUDY/STUDY/Postgraduate/papers/GS/' or root =='/var/www/GS/'):
     h ='43.129.28.10'
 
 POOL = PooledDB(

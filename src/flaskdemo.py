@@ -153,31 +153,25 @@ def handler():
             score = js['SCORE']['AI']
             res = True
             ip = request.remote_addr
-            sql_record = "select * from record where user_name = %s and score = %s and json_dict = %s and ip = %s and hash=%s "
+            sql_record = "select * from record where user_name = %s and score = %s  and ip = %s and hash=%s "
             hs = hash_list(f_path)
-            res = pymysql_demo.select_record(sql_record, [username, float(score), str(js),ip,hs])
+            res = pymysql_demo.select_record(sql_record, [username, float(score),ip,str(hs)])
             img_base64,s = json2img(js)
-            f = get_res_files(f_path,s,js)
-            if(f):
-                make_zip(f_path)
+
+            # f = get_res_files(f_path,s,js)
+            # if(f):
+            #     make_zip(f_path)
             if(res):
-                sql_token_record_insert = "insert into record (user_name,score,file_path,upload_time,json_dict,ip,hash) values (%s, %s,%s,now(),%s,%s,%s)"
-                res_token_ = pymysql_demo.record_insert(sql_token_record_insert, [username, float(score), f_path, str(js),ip,hs])
+                sql_token_record_insert = "insert into record (user_name,score,file_path,upload_time,ip,hash,json_dict) values (%s, %s,%s,now(),%s,%s,%s)"
+                res_token_ = pymysql_demo.record_insert(sql_token_record_insert, [username, float(score), f_path, ip,str(hs),str(js)])
             else:
                 pass
                 # shutil.rmtree(f_path)
-    # return {
-        #     'code':500,
-        #     'msg':'文件类型错误',
-        #     'data':json
-        # }
-
-        # sim_js = sim_json(js)
         res = js['SCORE']['AI']  #存在数据库中的分数
         tmp = {
             'msg': res,
             'pic' :img_base64,
-            'name':str(index)+'：'+f_name,
+            'name':'项目'+str(index+1)+'：'+f_name,
             'zip_file':cur_timestamp+f_index
         }
         bp.append(tmp)
@@ -402,11 +396,14 @@ def download_file(fname):
     return send_from_directory(root+'data/tmp/res/', fname+'.zip', as_attachment=True)
 
 if __name__ == '__main__':
-    if(root!='/Users/oo/STUDY/STUDY/Postgraduate/papers/wordCl/'):
+    if( root =='/var/www/GS/'):
+        app.run(host='0.0.0.0',port=80)
+    elif(root!='/Users/oo/STUDY/STUDY/Postgraduate/papers/wordCl/'):
         app.run(host='0.0.0.0',port=443,ssl_context=(
             root+'ssl/7375998_meta-intell.tech.pem',
             root+'ssl/7375998_meta-intell.tech.key'))
         # app.run()
+
     else:
         # app.run(ssl_context=('ggl.pem', 'ggl.key'))
         # app.run(ssl_context=(root+'ssl/meta-intell.com_bundle.crt', root+'ssl/meta-intell.com.key'))

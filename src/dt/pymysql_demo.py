@@ -173,7 +173,7 @@ def select_get_userid(sql, args):
 def select_records():
     conn, cur = create_conn()
     try:
-        cur.execute("select * from record")
+        cur.execute("select * from record  order by no desc")
         result = cur.fetchall()
         conn.commit()
         close_conn(conn, cur)

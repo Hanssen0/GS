@@ -257,12 +257,19 @@ def pdf_hl(f_path,l,js):
         pdf=fitz.open(f_path)
     except:
         return
-    heads= []
+
     # table = [{}*5][]
 
     article_inf = {}
     blocks_list = []
     index = 0
+    if('FILES' in js.keys()):
+        files = js['FILES']
+    for f in files:
+        etys = f['ENTITYS']
+        for ety in etys:
+            if(ety['name'] not in s):
+                s.add(ety['name'])
     for index,page in enumerate(pdf):
         text=page.getText()
 
@@ -276,28 +283,21 @@ def pdf_hl(f_path,l,js):
 
         if('。' in text):
             sens=text.replace('\n',' ').split('。')
-
-            for blo in sens:
-                for item in l :
-                    if(item in blo):
-                        for txt in page.searchFor(blo.strip()):
-                            highlight = page.addHighlightAnnot(txt)
-                            highlight.setColors({"stroke":(0, 1, 0), "fill":(0.75, 0.8, 0.95)})
-                            highlight.update()
-
         else:
             if(index==0):
                 continue
             sens=text.split('\n')
+        for blo in sens:
+            for item in l :
+                if(item in blo):
+                    for txt in page.searchFor(blo.strip()):
+                        highlight = page.addHighlightAnnot(txt)
+                        highlight.setColors({"stroke":(0, 1, 0), "fill":(0.75, 0.8, 0.95)})
+                        highlight.update()
 
-            for blo in sens:
-                for item in l :
-                    if(item in blo):
-                        for txt in page.searchFor(blo.strip()):
-                            highlight = page.addHighlightAnnot(txt)
-                            # highlight.setColors({"stroke":(1, 0, 0), "fill":(0.75, 0.8, 0.95)})
-                            #
-                            # highlight.update()
+
+
+
 
     if(index>3):
         txt = ""
@@ -320,9 +320,12 @@ def pdf_hl(f_path,l,js):
         for index,page in enumerate(pdf):
 
             if(index==0):
+                pix = page.getPixmap()
+                h = pix.h/4
+                w = pix.w/2
 
 
-                page.addTextAnnot ((200,200), txt)
+                page.addTextAnnot ((w,h), txt)
     fpath,fname=os.path.split(f_path)
     if not os.path.exists(fpath+'/res'):  #判断是否存在文件夹如果不存在则创建为文件夹
         os.mkdir(fpath+'/res')

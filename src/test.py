@@ -244,14 +244,14 @@ if __name__=='__main__':
     infile = "/Users/oo/STUDY/STUDY/Postgraduate/papers/wordCl/data/src_data/苏州大学医学部2020创业项目/苏州大学医学部互联网+项目/21基于蛋白纳米反应器的肿瘤诊疗一体化纳米药物的开发-龚黎明-医学部/基于蛋白纳米反应器的肿瘤诊疗一体化纳米药物的开发-商业计划书-龚黎明.docx"
     infile1 = "/Users/oo/STUDY/STUDY/Postgraduate/papers/wordCl/data/src_data/苏州大学医学部2020创业项目/苏州大学医学部互联网+项目/21基于蛋白纳米反应器的肿瘤诊疗一体化纳米药物的开发-龚黎明-医学部/基于蛋白纳米反应器的肿瘤诊疗一体化纳米药物的开发-商业计划书-龚黎明的副本.docx"
     infile1 = "/Users/oo/STUDY/STUDY/Postgraduate/papers/wordCl/data/src_data/苏州大学医学部2020创业项目/苏州大学医学部互联网+项目/21基于蛋白纳米反应器的肿瘤诊疗一体化纳米药物的开发-龚黎明-医学部/基于蛋白纳米反应器的肿瘤诊疗一体化纳米药物的开发-商业计划书-龚黎明的副本2.docx"
-    path = root+'data/var/www/uploads/1647831978650941_0/灵犀三维可视化交互系统（项目计划书）.pdf'
+    path = root+'data/var/www/uploads/16483614041977038_1/灵犀三维可视化交互系统（项目计划书）.pdf'
     js = {'SCORE': {'AI': 67.5}, 'FILES': [{'NAME': '灵犀三维可视化交互系统（项目计划书）', 'LABELS': {'__label__ACADEMIC': {'items': ['学院', '副教授', '研究员', '教授'], 'score': 1}, '__label__INDUSTRIAL': {'items': [], 'score': 0}, '__label__BUSINESS': {'items': ['销售收入', '净利润', '产业', '现状', '规模', '销售额', '前景', '分析', '预测'], 'score': 1}, '__label__INVESTMENT': {'items': ['投资', '资金', '资金来源'], 'score': 1}, '__label__PATENTS': {'items': ['著作权', '计算机软件', '知识产权', '技术开发'], 'score': 1}}, 'ENTITYS': [{'name': '副教授', 'score': 1.75}, {'name': '教授', 'score': 1.75}]}]}
 
-    # pdf_hl(path,l,js)
+    pdf_hl(path,l,js)
 
     fpath,fname=os.path.split(path)
 
-    make_zip(fpath)
+    # make_zip(fpath)
 
 
 # doc2pdf(infile)
