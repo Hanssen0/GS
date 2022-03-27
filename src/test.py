@@ -207,12 +207,15 @@ def is_file_legal(path):
 #     doc.Close()
 #     word.Quit()
 def make_zip(fpath):
+    if not os.path.exists(root+'data/tmp'):  #判断是否存在文件夹如果不存在则创建为文件夹
+        os.mkdir(root+'data/tmp')
     if not os.path.exists(root+'data/tmp/res'):  #判断是否存在文件夹如果不存在则创建为文件夹
         os.mkdir(root+'data/tmp/res')
 
     fname=fpath[0:-1].split('/')[-1]
 
-    shutil.make_archive(root+'data/tmp/res/'+fname, 'zip', fpath+'/res')
+
+    shutil.make_archive(root+'data/tmp/res/'+fname, 'zip', fpath+'res')
 
 
 if __name__=='__main__':
@@ -233,6 +236,8 @@ if __name__=='__main__':
     #         js = judge_folder(f[0])
     #         s_js = sim_json(js)
         #`
+
+    list = os.path.splitext("1.3.pdf")
     f_path = "/Users/oo/STUDY/STUDY/Postgraduate/papers/wordCl/data/src_data/2020年南通大学“互联网+”大学生创新创业大赛重点培育项目外审材料/30个项目/9.南通崇安环保科技/南通崇安环保科技有限公司“互联网+”商业计划书-丁孙浩.pdf"
     l = ['项目简介']
     l = ['副教授', '资金来源', '前景', '净利润', '计算机软件', '学院', '知识产权', '产业', '分析', '资金', '预测', '现状', '技术开发', '销售额', '研究员', '销售收入', '投资', '规模', '教授', '著作权']

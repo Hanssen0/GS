@@ -266,8 +266,8 @@ def pdf_hl(f_path,l,js):
     for index,page in enumerate(pdf):
         text=page.getText()
 
-        blocks = page.get_text("blocks")
-        lines = page.get_text("lines")
+        # blocks = page.get_text("blocks")
+        # lines = page.get_text("lines")
         # for blo in blocks:
         #     for item in l :
         #         if(item in blo[4]):
@@ -332,8 +332,11 @@ def pdf_hl(f_path,l,js):
 
 def get_res_files(folder_path,s,js):
     list = listdir(folder_path,[])
+    flag = False
     for f in list :
         if(f.endswith('pdf')):
             pdf_hl(f,s,js)
+            flag = True
+    return flag
 
 

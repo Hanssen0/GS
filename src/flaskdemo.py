@@ -122,12 +122,16 @@ def handler():
     cur_timestamp = timestamp.replace('.', '')
     files = request.files.getlist('files')
     bp = []
+    print(cur_timestamp)
+
     for index,f in enumerate(files):
     # f = request.files.get('filename')
         f_index = '_'+str(index)
         fname = f.filename
         type = judge_file(fname)
-        f_name = fname.split('.')[0]
+        f_name = os.path.splitext(fname)[0]
+        print('start_uncompress')
+
         uncompress(f,type,cur_timestamp+f_index)
         f_path = root+'data/var/www/uploads/'+cur_timestamp+f_index+'/'
         res = is_file_legal(f_path)
@@ -144,6 +148,7 @@ def handler():
             # userid = pymysql_demo.select_get_userid(sql_get_userid, [username])
             # sql_register = "insert into user (userName, password, email, create_time, userType) values (%s, %s, %s, now(), 0)"
             # res = pymysql_demo.user_insert(sql_register, [username, password_md5, email])
+            print('start_judge')
             js = judge_folder(f_path,model) #存在数据库中的json数据
             score = js['SCORE']['AI']
             res = True
@@ -152,8 +157,9 @@ def handler():
             hs = hash_list(f_path)
             res = pymysql_demo.select_record(sql_record, [username, float(score), str(js),ip,hs])
             img_base64,s = json2img(js)
-            res_files = get_res_files(f_path,s,js)
-            make_zip(f_path)
+            f = get_res_files(f_path,s,js)
+            if(f):
+                make_zip(f_path)
             if(res):
                 sql_token_record_insert = "insert into record (user_name,score,file_path,upload_time,json_dict,ip,hash) values (%s, %s,%s,now(),%s,%s,%s)"
                 res_token_ = pymysql_demo.record_insert(sql_token_record_insert, [username, float(score), f_path, str(js),ip,hs])
@@ -171,7 +177,7 @@ def handler():
         tmp = {
             'msg': res,
             'pic' :img_base64,
-            'name':f_name,
+            'name':str(index)+'：'+f_name,
             'zip_file':cur_timestamp+f_index
         }
         bp.append(tmp)
