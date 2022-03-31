@@ -252,6 +252,12 @@ def hash_list(folder_path):
     for h in h_l:
         h_txt+=str(h)
     return h_txt
+
+def judge_txt(txt,s):
+    for it in s:
+        if(it in txt):
+            return True
+    return False
 def pdf_hl(f_path,l,js):
     try:
         pdf=fitz.open(f_path)
@@ -263,13 +269,14 @@ def pdf_hl(f_path,l,js):
     article_inf = {}
     blocks_list = []
     index = 0
+    s = set()
     if('FILES' in js.keys()):
         files = js['FILES']
-    for f in files:
-        etys = f['ENTITYS']
-        for ety in etys:
-            if(ety['name'] not in s):
-                s.add(ety['name'])
+        for f in files:
+            etys = f['ENTITYS']
+            for ety in etys:
+                if(ety['name'] not in s):
+                    s.add(ety['name'])
     for index,page in enumerate(pdf):
         text=page.getText()
 
@@ -292,8 +299,9 @@ def pdf_hl(f_path,l,js):
                 if(item in blo):
                     for txt in page.searchFor(blo.strip()):
                         highlight = page.addHighlightAnnot(txt)
-                        highlight.setColors({"stroke":(0, 1, 0), "fill":(0.75, 0.8, 0.95)})
-                        highlight.update()
+                        if(judge_txt(item,s)):
+                            highlight.setColors({"stroke":(0, 1, 0), "fill":(0.75, 0.8, 0.95)})
+                            highlight.update()
 
 
 

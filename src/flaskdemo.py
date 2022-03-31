@@ -395,6 +395,14 @@ def get_history_record():
 def download_file(fname):
     return send_from_directory(root+'data/tmp/res/', fname+'.zip', as_attachment=True)
 
+
+@app.route("/download_by_no/<no>", methods=['GET'])
+def download_file_by_no(no):
+    path = pymysql_demo.select_path_by_no([no])
+    fname=path[0:-1].split('/')[-1]
+    make_zip_record(path)
+    return send_from_directory(root+'data/tmp/record/', fname+'.zip', as_attachment=True)
+
 if __name__ == '__main__':
     if( root =='/var/www/GS/'):
         app.run(host='0.0.0.0',port=80)

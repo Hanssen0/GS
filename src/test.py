@@ -216,6 +216,16 @@ def make_zip(fpath):
 
 
     shutil.make_archive(root+'data/tmp/res/'+fname, 'zip', fpath+'res')
+def make_zip_record(fpath):
+    if not os.path.exists(root+'data/tmp'):  #判断是否存在文件夹如果不存在则创建为文件夹
+        os.mkdir(root+'data/tmp')
+    if not os.path.exists(root+'data/tmp/record'):  #判断是否存在文件夹如果不存在则创建为文件夹
+        os.mkdir(root+'data/tmp/record')
+
+    fname=fpath[0:-1].split('/')[-1]
+
+
+    shutil.make_archive(root+'data/tmp/record/'+fname, 'zip', fpath[0:-1])
 
 
 if __name__=='__main__':
@@ -247,11 +257,13 @@ if __name__=='__main__':
     path = root+'data/var/www/uploads/16483614041977038_1/灵犀三维可视化交互系统（项目计划书）.pdf'
     js = {'SCORE': {'AI': 67.5}, 'FILES': [{'NAME': '灵犀三维可视化交互系统（项目计划书）', 'LABELS': {'__label__ACADEMIC': {'items': ['学院', '副教授', '研究员', '教授'], 'score': 1}, '__label__INDUSTRIAL': {'items': [], 'score': 0}, '__label__BUSINESS': {'items': ['销售收入', '净利润', '产业', '现状', '规模', '销售额', '前景', '分析', '预测'], 'score': 1}, '__label__INVESTMENT': {'items': ['投资', '资金', '资金来源'], 'score': 1}, '__label__PATENTS': {'items': ['著作权', '计算机软件', '知识产权', '技术开发'], 'score': 1}}, 'ENTITYS': [{'name': '副教授', 'score': 1.75}, {'name': '教授', 'score': 1.75}]}]}
 
-    pdf_hl(path,l,js)
+    # pdf_hl(path,l,js)
 
     fpath,fname=os.path.split(path)
 
-    # make_zip(fpath)
+    # make_zip(fpath+'/')
+
+    make_zip_record('/Users/oo/STUDY/STUDY/Postgraduate/papers/GS/data/var/www/uploads/1648708857952696_0/')
 
 
 # doc2pdf(infile)

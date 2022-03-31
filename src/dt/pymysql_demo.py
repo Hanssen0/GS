@@ -240,6 +240,27 @@ def select_email(sql, args):
         close_conn(conn, cur)
         return False
 
+def select_path_by_no(args):
+    conn, cur = create_conn()
+    try:
+        sql = "select file_path from record where no = %s"
+        cur.execute(sql, args)
+        conn.commit()
+        close_conn(conn, cur)
+        res = cur.fetchall()
+        for r in res:
+            path = r['file_path']
+        if len(res) == 0:
+            return ''
+        return  path
+
+    except Exception as e:
+        print("select path except", args)
+        conn.rollback()
+        close_conn(conn, cur)
+        return False
+
+
 
 def update_pwd(sql, args):
     conn, cur = create_conn()
