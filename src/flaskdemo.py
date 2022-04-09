@@ -374,10 +374,14 @@ def get_history_record():
     if res == False or res == '':
         return jsonify(response_result.USER_NOT_EXISTS)
 
-    if res["usertype"] != 2:
+    if res["usertype"] != 2 and res["usertype"] != 3:
         return jsonify(response_result.NO_PERMISSION)
 
-    records = pymysql_demo.select_records()
+    records = []
+    if res["usertype"] == 2:
+        records = pymysql_demo.select_records_assigned_to_user(res["id"])
+    elif res["usertype"] == 3:
+        records = pymysql_demo.select_records()
 
     result = response_result.SUCCESS
     result["records"] = records
@@ -402,6 +406,68 @@ def download_file_by_no(no):
     fname=path[0:-1].split('/')[-1]
     make_zip_record(path)
     return send_from_directory(root+'data/tmp/record/', fname+'.zip', as_attachment=True)
+
+
+@app.route("/users_by_type/<userType>", methods=['GET'])
+def get_users_by_type(userType):
+    result = response_result.SUCCESS
+    result["users"] = pymysql_demo.select_users_by_type(userType)
+
+    return jsonify(result)
+
+
+@app.route("/assign/<recordId>/<userId>", methods=['POST'])
+def assign_record_to_user(recordId, userId):
+    pymysql_demo.assign_record_to_user(recordId, userId)
+
+    return jsonify(response_result.SUCCESS)
+
+
+@app.route("/comment/<recordId>", methods=['POST'])
+def comment_record(recordId):
+    req = request
+    str_req_data = req.data.decode('UTF-8')
+    json_req_data = json.loads(str_req_data)
+    score = json_req_data['score']
+    comment = json_req_data['comment']
+
+    user = request.headers.get('username')
+    user = parse.unquote(user)
+
+    res = pymysql_demo.select_get_user_info([user])
+
+    pymysql_demo.comment_record(recordId, res["id"], score, comment)
+
+    return jsonify(response_result.SUCCESS)
+
+
+@app.route("/assign/<recordId>/<userId>", methods=['DELETE'])
+def deassign_record_to_user(recordId, userId):
+    pymysql_demo.deassign_record_to_user(recordId, userId)
+
+    return jsonify(response_result.SUCCESS)
+
+
+@app.route("/assigned_users/<recordId>", methods=['GET'])
+def get_assigned_users(recordId):
+    result = response_result.SUCCESS
+    result["users"] = pymysql_demo.select_assigned_users_by_record(recordId)
+
+    return jsonify(result)
+
+
+@app.route("/notComment", methods=['GET'])
+def get_not_commented():
+    user = request.headers.get('username')
+    user = parse.unquote(user)
+
+    res = pymysql_demo.select_get_user_info([user])
+
+    result = response_result.SUCCESS
+    result["count"] = pymysql_demo.select_not_commented(res["id"])[0]["count(*)"]
+
+    return jsonify(result)
+
 
 if __name__ == '__main__':
     if( root =='/var/www/GS/'):

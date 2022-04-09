@@ -138,6 +138,7 @@ def select_get_user_info(args):
         close_conn(conn, cur)
         res = cur.fetchall()
         for r in res:
+            id = r['id']
             username = r['userName']
             email = r['email']
             usertype = r['userType']
@@ -146,6 +147,7 @@ def select_get_user_info(args):
             return ''
 
         return {
+            "id": id,
             "username": username,
             "email": email,
             "usertype": usertype,
@@ -174,6 +176,23 @@ def select_records():
     conn, cur = create_conn()
     try:
         cur.execute("select * from record  order by no desc")
+        result = cur.fetchall()
+        conn.commit()
+        close_conn(conn, cur)
+        return result
+    except Exception as e:
+        print("records select except")
+        conn.rollback()
+        close_conn(conn, cur)
+        return False
+
+def select_records_assigned_to_user(userId):
+    conn, cur = create_conn()
+    try:
+        cur.execute(
+            "select no, assignment.score, comment from record right outer join assignment on record_id = no where user_id = %s order by no desc",
+            userId
+        )
         result = cur.fetchall()
         conn.commit()
         close_conn(conn, cur)
@@ -277,3 +296,95 @@ def update_pwd(sql, args):
         close_conn(conn, cur)
         return False
 
+def select_users_by_type(args):
+    conn, cur = create_conn()
+    try:
+        cur.execute("select * from user where userType = %s", args)
+        result = cur.fetchall()
+        conn.commit()
+        close_conn(conn, cur)
+        return result
+    except Exception as e:
+        print("users select except")
+        conn.rollback()
+        close_conn(conn, cur)
+        return False
+
+def assign_record_to_user(recordId, userId):
+    conn, cur = create_conn()
+    try:
+        cur.execute(
+            "insert into assignment (record_id, user_id) values (%s, %s)",
+            [recordId, userId]
+        )
+        conn.commit()
+        close_conn(conn, cur)
+        return True
+    except Exception as e:
+        print("assignment insert except")
+        conn.rollback()
+        close_conn(conn, cur)
+        return False
+
+def deassign_record_to_user(recordId, userId):
+    conn, cur = create_conn()
+    try:
+        cur.execute(
+            "delete from assignment where record_id = %s and user_id = %s",
+            [recordId, userId]
+        )
+        conn.commit()
+        close_conn(conn, cur)
+        return True
+    except Exception as e:
+        print("assignment delete except")
+        conn.rollback()
+        close_conn(conn, cur)
+        return False
+
+def select_assigned_users_by_record(args):
+    conn, cur = create_conn()
+    try:
+        cur.execute("select * from assignment where record_id = %s", args)
+        result = cur.fetchall()
+        conn.commit()
+        close_conn(conn, cur)
+        return result
+    except Exception as e:
+        print("assignment select except")
+        conn.rollback()
+        close_conn(conn, cur)
+        return False
+
+def comment_record(recordId, userId, score, comment):
+    conn, cur = create_conn()
+    try:
+        cur.execute(
+            "update assignment set score = %s, comment = %s where record_id = %s and user_id = %s",
+            [score, comment, recordId, userId]
+        )
+        conn.commit()
+        close_conn(conn, cur)
+        return True
+    except Exception as e:
+        print("comment record except")
+        conn.rollback()
+        close_conn(conn, cur)
+        return False
+
+def select_not_commented(userId):
+    conn, cur = create_conn()
+    try:
+        cur.execute(
+            "select count(*) from assignment where user_id = %s and score is null and comment is null",
+            [userId]
+        )
+        result = cur.fetchall()
+        conn.commit()
+        close_conn(conn, cur)
+        return result
+    except Exception as e:
+        print("not commented select except")
+        conn.rollback()
+        close_conn(conn, cur)
+        return False
