@@ -469,6 +469,49 @@ def get_not_commented():
     return jsonify(result)
 
 
+@app.route("/applyConsultant", methods=['POST'])
+def apply_consultant():
+    req = request
+    str_req_data = req.data.decode('UTF-8')
+    json_req_data = json.loads(str_req_data)
+    form = json_req_data['form']
+
+    user = request.headers.get('username')
+    user = parse.unquote(user)
+
+    res = pymysql_demo.select_get_user_info([user])
+
+    if res["usertype"] != 1:
+        return jsonify(response_result.NO_PERMISSION)
+
+    pymysql_demo.apply_consultant(res["id"], form)
+
+    user_usertype_update_sql = "update user set userType=4 where id=%s"
+    pymysql_demo.user_usertype_update(user_usertype_update_sql, [res["id"]])
+
+    return jsonify(response_result.SUCCESS)
+
+
+@app.route("/specifyBP", methods=['POST'])
+def specify_bps():
+    req = request
+    str_req_data = req.data.decode('UTF-8')
+    json_req_data = json.loads(str_req_data)
+    bps = json_req_data['bps']
+
+    user = request.headers.get('username')
+    user = parse.unquote(user)
+
+    res = pymysql_demo.select_get_user_info([user])
+
+    if res["usertype"] != 3:
+        return jsonify(response_result.NO_PERMISSION)
+
+    pymysql_demo.specify_bps(bps)
+
+    return jsonify(response_result.SUCCESS)
+
+
 if __name__ == '__main__':
     if( root =='/var/www/GS/'):
         app.run(host='0.0.0.0',port=80)

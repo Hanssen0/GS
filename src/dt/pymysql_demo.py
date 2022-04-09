@@ -388,3 +388,37 @@ def select_not_commented(userId):
         conn.rollback()
         close_conn(conn, cur)
         return False
+
+def apply_consultant(userId, form):
+    conn, cur = create_conn()
+    try:
+        cur.execute(
+            "insert into apply_consultant (user_id, form_json, status) values (%s, %s, 0)",
+            [userId, form]
+        )
+        conn.commit()
+        close_conn(conn, cur)
+        return True
+    except Exception as e:
+        print("apply consultant insert except")
+        conn.rollback()
+        close_conn(conn, cur)
+        return False
+
+def specify_bps(bps):
+    conn, cur = create_conn()
+    try:
+        cur.execute("update record set isWaiting=0")
+        format_strings = ','.join(['%s'] * len(bps))
+        cur.execute(
+            "update record set isWaiting=1 where no in (%s)" % format_strings,
+            tuple(bps)
+        )
+        conn.commit()
+        close_conn(conn, cur)
+        return True
+    except Exception as e:
+        print("specify bp except")
+        conn.rollback()
+        close_conn(conn, cur)
+        return False
