@@ -422,3 +422,93 @@ def specify_bps(bps):
         conn.rollback()
         close_conn(conn, cur)
         return False
+
+def get_consultant_applications():
+    conn, cur = create_conn()
+    try:
+        cur.execute(
+            "select apply_consultant.id as id, user_id, userName, status from apply_consultant left outer join user on user.id = user_id order by apply_consultant.id desc"
+        )
+        result = cur.fetchall()
+        conn.commit()
+        close_conn(conn, cur)
+        return result
+    except Exception as e:
+        print("select consultant applications except")
+        conn.rollback()
+        close_conn(conn, cur)
+        return False
+
+def get_consultant_application_by_id(id):
+    conn, cur = create_conn()
+    try:
+        cur.execute(
+            "select apply_consultant.id as id, form_json, user_id, userName, status from apply_consultant left outer join user on user.id = user_id where apply_consultant.id = %s",
+            [id]
+        )
+        result = cur.fetchall()
+        conn.commit()
+        close_conn(conn, cur)
+        return result
+    except Exception as e:
+        print("select consultant applications except")
+        conn.rollback()
+        close_conn(conn, cur)
+        return False
+
+def pass_consultant_applications(id):
+    conn, cur = create_conn()
+    try:
+        cur.execute(
+            "update apply_consultant set status=2 where id = %s",
+            [id]
+        )
+        cur.execute(
+            "update user set userType=2 where id in (select user_id from apply_consultant where id = %s)",
+            [id]
+        )
+        conn.commit()
+        close_conn(conn, cur)
+        return True
+    except Exception as e:
+        print("update consultant applications except")
+        conn.rollback()
+        close_conn(conn, cur)
+        return False
+
+def reject_consultant_applications(id):
+    conn, cur = create_conn()
+    try:
+        cur.execute(
+            "update apply_consultant set status=1 where id = %s",
+            [id]
+        )
+        cur.execute(
+            "update user set userType=1 where id in (select user_id from apply_consultant where id = %s)",
+            [id]
+        )
+        conn.commit()
+        close_conn(conn, cur)
+        return True
+    except Exception as e:
+        print("update consultant applications except")
+        conn.rollback()
+        close_conn(conn, cur)
+        return False
+
+def select_records_assigned_to_user_as_admin(userId):
+    conn, cur = create_conn()
+    try:
+        cur.execute(
+            "select no, record.score as ai_score, assignment.score, comment from record right outer join assignment on record_id = no where user_id = %s order by no desc",
+            userId
+        )
+        result = cur.fetchall()
+        conn.commit()
+        close_conn(conn, cur)
+        return result
+    except Exception as e:
+        print("records select except")
+        conn.rollback()
+        close_conn(conn, cur)
+        return False

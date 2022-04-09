@@ -374,11 +374,11 @@ def get_history_record():
     if res == False or res == '':
         return jsonify(response_result.USER_NOT_EXISTS)
 
-    if res["usertype"] != 2 and res["usertype"] != 3:
+    if res["usertype"] != 2 and res["usertype"] != 3 and res["usertype"] != 4:
         return jsonify(response_result.NO_PERMISSION)
 
     records = []
-    if res["usertype"] == 2:
+    if res["usertype"] == 2 or res["usertype"] == 4:
         records = pymysql_demo.select_records_assigned_to_user(res["id"])
     elif res["usertype"] == 3:
         records = pymysql_demo.select_records()
@@ -510,6 +510,86 @@ def specify_bps():
     pymysql_demo.specify_bps(bps)
 
     return jsonify(response_result.SUCCESS)
+
+
+@app.route("/consultantApplications", methods=['GET'])
+def get_consultant_applications():
+    user = request.headers.get('username')
+    user = parse.unquote(user)
+
+    res = pymysql_demo.select_get_user_info([user])
+
+    if res["usertype"] != 3:
+        return jsonify(response_result.NO_PERMISSION)
+
+    result = response_result.SUCCESS
+    result["applications"] = pymysql_demo.get_consultant_applications()
+
+    return jsonify(response_result.SUCCESS)
+
+
+@app.route("/consultantApplications/by-id/<id>", methods=['GET'])
+def get_consultant_application_by_id(id):
+    user = request.headers.get('username')
+    user = parse.unquote(user)
+
+    res = pymysql_demo.select_get_user_info([user])
+
+    if res["usertype"] != 3:
+        return jsonify(response_result.NO_PERMISSION)
+
+    result = response_result.SUCCESS
+    result["application"] = pymysql_demo.get_consultant_application_by_id(id)[0]
+
+    return jsonify(response_result.SUCCESS)
+
+
+@app.route("/applications/<id>/reject", methods=['POST'])
+def reject_consultant_applications(id):
+    user = request.headers.get('username')
+    user = parse.unquote(user)
+
+    res = pymysql_demo.select_get_user_info([user])
+
+    if res["usertype"] != 3:
+        return jsonify(response_result.NO_PERMISSION)
+
+    pymysql_demo.reject_consultant_applications(id);
+
+    return jsonify(response_result.SUCCESS)
+
+
+@app.route("/applications/<id>/pass", methods=['POST'])
+def pass_consultant_applications(id):
+    user = request.headers.get('username')
+    user = parse.unquote(user)
+
+    res = pymysql_demo.select_get_user_info([user])
+
+    if res["usertype"] != 3:
+        return jsonify(response_result.NO_PERMISSION)
+
+    pymysql_demo.pass_consultant_applications(id);
+
+    return jsonify(response_result.SUCCESS)
+
+
+@app.route('/historyRecord/toUser/<userId>', methods=["GET"])
+def get_history_record_to_user(userId):
+    user = request.headers.get('username')
+    user = parse.unquote(user)
+
+    res = pymysql_demo.select_get_user_info([user])
+
+    if res["usertype"] != 3:
+        return jsonify(response_result.NO_PERMISSION)
+
+    records = pymysql_demo.select_records_assigned_to_user_as_admin(userId)
+
+    result = response_result.SUCCESS
+    result["records"] = records
+
+    return jsonify(result)
 
 
 if __name__ == '__main__':
